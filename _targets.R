@@ -10,7 +10,8 @@ library(tarchetypes) # Load other packages as needed.
 # Set target options:
 tar_option_set(
   packages = c("tibble"), # packages that your targets need to run
-  format = "qs" # Optionally set the default storage format. qs is fast.
+  format = "qs",
+  repository = "local" # where to store the target data
   #
   # For distributed computing in tar_make(), supply a {crew} controller
   # as discussed at https://books.ropensci.org/targets/crew.html.
@@ -35,6 +36,10 @@ tar_option_set(
   # Set other options as needed.
 )
 
+
+tar_config_set(
+  store = "/ddn/gs1/group/set/targets_test/"
+)
 # tar_make_clustermq() is an older (pre-{crew}) way to do distributed computing
 # in {targets}, and its configuration for your machine is below.
 #options(clustermq.scheduler = "multicore")
@@ -51,7 +56,7 @@ tar_source()
 list(
   tar_target(
       my_files,
-      unlist(list.files("data",full.names = TRUE))
+      unlist(list.files("data", full.names = TRUE))
     ),
     tar_target(
       read_data,
