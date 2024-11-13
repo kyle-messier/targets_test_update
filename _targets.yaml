@@ -1,2 +1,2 @@
 main:
-  store: /ddn/gs1/group/set/targets_test/
+  store: _targets/

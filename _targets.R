@@ -38,7 +38,7 @@ tar_option_set(
 
 
 tar_config_set(
-  store = "/ddn/gs1/group/set/targets_test/"
+  store = "_targets/"
 )
 # tar_make_clustermq() is an older (pre-{crew}) way to do distributed computing
 # in {targets}, and its configuration for your machine is below.
@@ -55,32 +55,30 @@ tar_source()
 # Replace the target list below with your own:
 list(
   tar_target(
-      my_files,
-      unlist(list.files("data", full.names = TRUE))
+      start_range,
+      command = 1:13
     ),
     tar_target(
-      read_data,
-      readr::read_csv(my_files),
-      pattern = map(my_files)
+      parse_range,
+      command = {
+        result <- split(start_range, ceiling(seq_along(start_range) / 2)) 
+        result
+      }
     ),
   tar_target(
-    name = data_format,
-    command = tibble(x = read_data$x, y = read_data$y),
-    pattern = map(read_data)
-    # format = "feather" # efficient storage for large data frames
+    name = data_model,
+    command = dnorm(seq(-3, 3, by = 0.1), parse_range[[1]][1], parse_range[[1]][2]), #nolint
+    pattern = map(parse_range),
+    iteration = "list"
   ),
   tar_target(
-    name = model,
-    command = lm(y ~ x, data = data_format),
-    pattern = map(data_format)
-  ),
+    name = sum_model,
+    command = sum(data_model),
+    pattern = map(data_model),
+    iteration = "list"
+  ), 
   tar_target(
-    name = model_coefficients,
-    command = coefficients(model),
-    pattern = map(model)
-  ),
-  tar_target(
-    name = coefficients_table,
-    command = model_coefficients
+    name = cat_model, 
+    command = dplyr::bind_cols(sum_model)
   )
 )
